@@ -104,9 +104,14 @@
 
 function saveStaticDataToFile() {
 	console.log("IR");
-    var blob = new Blob(["Welcome to Websparrow.org."],
-	{ type: "text/plain;charset=utf-8" });
-    saveAs(blob, "static.txt");
+    var fs = require('fs');
+fs.writeFile("/tmp/test.txt", "Hey there!", function(err) {
+    if(err) {
+        console.log(err);
+    } else {
+        console.log("The file was saved!");
+    }
+}); 
 }
 
 </script>
