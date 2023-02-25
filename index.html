@@ -105,7 +105,7 @@
 function saveStaticDataToFile() {
 	console.log("IR");
     var fs = require('fs');
-fs.writeFile("/tmp/test.txt", "Hey there!", function(err) {
+fs.writeFile("test.txt", "Hey there!", function(err) {
     if(err) {
         console.log(err);
     } else {
