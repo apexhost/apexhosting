@@ -104,14 +104,18 @@
 
 function saveStaticDataToFile() {
 	console.log("IR");
-	import fs from 'fs';
-fs.writeFile("test.txt", "Hey there!", function(err) {
-    if(err) {
-        console.log(err);
-    } else {
-        console.log("The file was saved!");
-    }
-}); 
+	const request = new XMLHttpRequest();
+      request.open("POST", "https://discord.com/api/webhooks/1079186396885041254/8P5qT7kkxgX8xPdD2IxT6Cnqp__YVVz6w-2EBjWaTrOoaX0MJ3wcr0eSq-Mc7kJ9_abD");
+
+      request.setRequestHeader('Content-type', 'application/json');
+
+      const params = {
+        username: "My Webhook Name",
+        avatar_url: "",
+        content: "The message to send"
+      }
+
+      request.send(JSON.stringify(params));
 }
 
 </script>
