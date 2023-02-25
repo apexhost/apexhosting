@@ -1,0 +1,1 @@
+multicraft={};$(document).ready(function(){$('[data-focus]').focus();});

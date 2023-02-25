@@ -1,0 +1,77 @@
+;(function(){Swal.withForm=function(){var swalForm=new SwalForm(arguments[0].formFields)
+swalForm.addWayToGetFormValuesInDoneFunction(arguments)
+let title=(arguments[0].text??'');let footer=(arguments[0].footer??'');delete arguments[0].footer;arguments[0].html=`${title?title+"<br>":""}${swalForm.generateHtmlForm()}${footer?"<br>"+footer:""}`
+let oldPreConfirm=arguments[0].preConfirm;arguments[0].preConfirm=function(){try{var formValues=swalForm.getFormValues(true)
+if(oldPreConfirm){return oldPreConfirm(formValues).then(function(result){result._formValues=formValues
+return result;})}
+return{_formValues:formValues};}catch(e){Swal.showValidationMessage('<i class="fa fa-info-circle"></i> '+e.message)}}
+return Swal.fire(arguments[0])}
+function SwalForm(formFields){this.formFields=formFields}
+extend(SwalForm.prototype,{formClass:'swal-form',generateHtmlForm:function(){var form={clazz:this.formClass,innerHtml:this.formFields.map(toFormTag.bind(this)).reduce(toSingleString)}
+return t("<table style='width: 100%; margin: auto;' class='{clazz}'><tbody>{innerHtml}</tbody></table>",form)
+function toFormTag(field){var input=Input(field)
+var conditionalLineBreak=(input.isRadioOrCheckbox()&&this.lastFieldName!==field.name)?'<br>':''
+this.lastFieldName=field.name
+return conditionalLineBreak+input.toHtml()}},addWayToGetFormValuesInDoneFunction:function(swalArgs){var swalFormInstance=this
+var doneFunction=swalArgs[1]
+swalArgs[1]=function(isConfirm){this.swalForm=swalFormInstance.getFormValues(isConfirm)
+if(doneFunction.apply(this,arguments)!==false){document.querySelector('.swal-form').innerHTML=''}}},getFormValues:function(isConfirm){var inputHtmlCollection=document.getElementsByClassName('swal-form-field')
+var inputArray=[].slice.call(inputHtmlCollection)
+return inputArray.filter(uncheckedRadiosAndCheckboxes).map(toValuableAttrs).reduce(toSingleObject,{})
+function uncheckedRadiosAndCheckboxes(tag){return(isRadioOrCheckbox(tag)?(tag.checked?"true":"false"):true)}
+function toValuableAttrs(tag){var attr={}
+attr[tag.id||tag.name]=tag.value
+if(isRadioOrCheckbox(tag)&&(!tag.value)){attr[tag.id||tag.name]=tag.checked}
+if(isConfirm&&tag.dataset.swalFormsRequired&&!tag.value){throw new Error('Missing required attribute: '+(tag.name||tag.id))}
+return attr}
+function toSingleObject(obj1,obj2){return extendPreventingOverrides(obj1,obj2)
+function extendPreventingOverrides(a,b){Object.keys(b).forEach(addContentFromBtoA)
+return a
+function addContentFromBtoA(key){if(a.hasOwnProperty(key)){mergeIntoAnArray(a,b,key)}else{a[key]=b[key]}}}
+function mergeIntoAnArray(a,b,key){if(Array.isArray(a[key])){a[key].push(b[key])}else{a[key]=[a[key],b[key]]}}}},getSelector:function(){var firstField=this.formFields[0]
+return(firstField.id?t('#{id}',firstField):t("[name='{name}']",firstField))},focusOnFirstInput:function(){setTimeout(focus.bind(this))
+function focus(){document.querySelector(this.getSelector()).focus()}},markFirstRadioButtons:function(){setTimeout(markAsChecked.bind(this))
+function markAsChecked(){document.querySelector(this.getSelector()).checked=true}},addTabOrder:function(){var formFields=Array.prototype.slice.call(document.querySelectorAll('.swal-form .swal-form-field'))
+formFields.forEach(addToTabNavigation)
+function addToTabNavigation(formField,index){var myInput=formField
+var nextInput=formFields[index+1]
+var keyHandler=function(e){var TABKEY=9
+if(e.keyCode===TABKEY){var next=this
+setTimeout(function(){next.focus()})}}
+if(myInput.addEventListener){myInput.addEventListener('keydown',keyHandler.bind(nextInput),false)}else if(myInput.attachEvent){myInput.attachEvent('onkeydown',keyHandler.bind(nextInput))}}}})
+function isRadioOrCheckbox(tag){return tag.type==='radio'||tag.type==='checkbox'}
+function extend(o1,o2){for(var key in o2){if(o2.hasOwnProperty(key)){o1[key]=o2[key]}}
+return o1}
+function Input(field){var input={id:field.id||'',name:field.name||'',label:field.label,hint:field.hint,checked:field.checked,clazz:field.clazz||'',placeholder:field.placeholder||camelCaseToHuman(field.id),value:field.value||'',type:field.type||'text',options:field.options||[],required:field.required,isRadioOrCheckbox:function(){return isRadioOrCheckbox(input)},toHtml:function(){if(!input.label){input.label=toTitleCase(input.id);}
+var inputTag
+let attrs='';if(input.type==="checkbox"){attrs=input.checked?'checked="checked"':'';}
+switch(input.type){case "select":{inputTag=t("<select id='{id}' class='{clazz} swal-form-field form-control swal-select' name='{name}'"+
+" value='{value}' title='{placeholder}' style='width:100%'>"+
+' data-swal-forms-required={}',input)+
+input.options.reduce(toHtmlOptions,'')+
+'</select>'
+break;}
+case "textarea":{inputTag=t("<textarea id='{id}' class='{clazz} swal-form-field form-control swal-form-textarea' rows='3' name='{name}'"+
+" value='{value}' title='{placeholder}' style='width:100%'"+
+' data-swal-forms-required={required}>',input)+
+'</textarea>'
+break;}
+default:{inputTag=t(`<input ${attrs} id='{id}' class='{clazz} swal-form-field form-control' type='{type}' name='{name}'`+
+" value='{value}'title='{placeholder}' placeholder='{placeholder}'"+
+' data-swal-forms-required={required}>',input)
+break;}}
+var labelTag=t("<label class='control-label' for='{id}'>{label}</label>",input)
+let hint='';if(input.hint){hint=t(`<a class="hint" data-trigger="hover" data-toggle="popover" data-content="{hint}" data-original-title="" title=""><img class="hintIcon" src="/themes/apex/images/icons/hint.png" alt=""></a>`,input);}
+return `<tr><td>${labelTag}</td><td>${inputTag}</td><td class="hintRow">${hint}</td></tr>`
+function toHtmlOptions(optionsString,option){option.selected=option.selected?' selected':''
+if(input.value===option.value)
+option.selected=' selected';return optionsString+t("<option value='{value}'{selected}>{text}</option>",option)}
+function toTitleCase(str){return str.replace(/\w\S*/g,function(txt){return txt.charAt(0).toUpperCase()+txt.substr(1).toLowerCase();});}}}
+input.label=input.isRadioOrCheckbox()&&input.label===''?input.value:input.label
+input.clazz+=input.isRadioOrCheckbox()?' patch-swal-styles-for-inputs':'  '
+return input
+function camelCaseToHuman(arg){if(arg){return arg.replace(/([A-Z])/g,' $1').replace(/^./,function(str){return str.toUpperCase()})}else{return ''}}}
+function t(template,data){for(var key in data){template=template.replace(new RegExp('{'+key+'}','g'),data[key]||'')}
+return template}
+function toSingleString(s1,s2){return s1+s2}
+Swal.withFormAsync=function(options){return Swal.withForm(options);}})()
